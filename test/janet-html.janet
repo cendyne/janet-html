@@ -18,6 +18,12 @@
   (test "empty div"
     (is (= "<div></div>" (html/html [:div]))))
 
+  (test "self closing element"
+    (is (= "<div />" (html/html [:div {:self-closing? true}]))))
+  
+  (test "boolean attribute"
+    (is (= "<div something></div>" (html/html [:div {:something :boolean-attribute?}]))))
+
   (test "empty div with spaces"
     (= "<div>hello world</div>" (html/html [:div "hello world"])))
 

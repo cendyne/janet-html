@@ -34,8 +34,11 @@
 
 
 (defn- void-element?
-  [name]
-  (some (partial = name) void-elements))
+  [name attr]
+  (default attr {})
+  (or 
+    (some (partial = name) void-elements)
+    (get attr :self-closing?)))
 
 
 (defn- text-element?
@@ -45,7 +48,11 @@
 
 (defn- attr-reducer
   [acc [attr value]]
-  (string acc " " attr `="` value `"`))
+  (cond
+    (= attr :self-closing?) acc
+    (= value :boolean-attribute?) (string acc " " attr)
+    true (string acc " " attr `="` value `"`)
+    ))
 
 
 (defn- create-attrs
@@ -72,7 +79,7 @@
                 attrs
                 (merge attrs {:class classes}))]
 
-    (string "<" (element-name name) (create-attrs attrs) (if (void-element? name) " />" ">"))))
+    (string "<" (element-name name) (create-attrs attrs) (if (void-element? name attrs) " />" ">"))))
 
 
 (defn- closing-tag
@@ -130,7 +137,7 @@
   [create name attrs children]
   (validate-element name attrs children)
   (cond
-    (void-element? name) (opening-tag name attrs)
+    (void-element? name attrs) (opening-tag name attrs)
     (text-element? name) (first children)
     :else (string (opening-tag name attrs)
                   (create-children create children)
